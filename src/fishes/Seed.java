@@ -5,12 +5,16 @@ public class Seed {
 	private int conflict_bounce;
 	private int steps;
 	private int view;
+	public int view_swivel;
+	public int view_cont;
 	
-	Seed(int swivel, int conflict, int steps, int view){
+	Seed(int swivel, int conflict, int steps, int view, int view_swivel, int view_cont){
 		swivel_range = swivel;
 		conflict_bounce = conflict;
 		this.steps = steps;
 		this.view = view;
+		this.view_swivel = view_swivel;
+		this.view_cont = view_cont;
 	}
 	
 	public int getSwivel(){
@@ -31,7 +35,8 @@ public class Seed {
 	
 	@Override
 	public String toString() { 
-	    String result = getSwivel() + "-" + getBounce() + "-" + getSteps()  + "-" + getView();
+	    String result = getSwivel() + "-" + getView() + "-" + getSteps() + "-" + view_swivel
+	    		+ "-" + view_cont;
 	    return result;
 	} 
 }

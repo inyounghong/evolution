@@ -32,14 +32,14 @@ public class Game extends TimerTask {
 
 		this.readFromFile();
 		
-		System.out.println("Seeds: " + seeds);
+		//System.out.println("Seeds: " + seeds);
 		this.printAverages();
 		
 		Simulation simulation = new Simulation();
 		try {
 			winners = simulation.runSim(this);
 			try{
-				System.out.println("Max Count: " + simulation.fishes.get(winners.get(0)));
+				int w = simulation.fishes.get(winners.get(0));
 			}
 			catch (IndexOutOfBoundsException e){
 				Thread.sleep(1000);
@@ -67,7 +67,11 @@ public class Game extends TimerTask {
 				content += fish.swivel_range;
 				content += " " + fish.conflict_bounce;
 				content += " " + fish.steps;
+				content += " " + fish.view;
+				content += " " + fish.view_swivel;
+				content += " " + fish.view_cont;
 				content += "\n";
+				System.out.print(fish.food_count + " ");
 			}
 
 			File file = new File("round" + game.round + ".txt");
@@ -95,10 +99,12 @@ public class Game extends TimerTask {
 			String content = "";
 			Random randomGen = new Random();
 			for (int i = 0; i < 10; i++){
-				content += randomGen.nextInt(100);
-				content += " " + randomGen.nextInt(360);
-				content += " " + randomGen.nextInt(40);
-				content += " " + randomGen.nextInt(15);
+				content += randomGen.nextInt(40);		 // Swivel range
+				content += " " + randomGen.nextInt(360); // Bounce
+				content += " " + randomGen.nextInt(60);	// Steps
+				content += " " + randomGen.nextInt(50);	 // View
+				content += " " + randomGen.nextInt(50);  // View swivel
+				content += " " + randomGen.nextInt(30);  // View continue
 				content += "\n";
 			}
 
@@ -135,9 +141,12 @@ public class Game extends TimerTask {
             	int new_swivel = Integer.parseInt(splitted[0]);
             	int new_bounce = Integer.parseInt(splitted[1]);
             	int new_steps = Integer.parseInt(splitted[2]);
-            	int new_view = Integer.parseInt(splitted[2]);
+            	int new_view = Integer.parseInt(splitted[3]);
+            	int new_view_swivel = Integer.parseInt(splitted[4]);
+            	int new_view_cont = Integer.parseInt(splitted[5]);
             			
-            	Seed s = new Seed(new_swivel, new_bounce, new_steps, new_view);
+            	Seed s = new Seed(new_swivel, new_bounce, new_steps, new_view, new_view_swivel,
+            			new_view_cont);
                 seeds.add(s);
             }   
             bufferedReader.close();
@@ -175,15 +184,24 @@ public class Game extends TimerTask {
 	
 	public void printAverages(){
 		double swivel = 0.0;
-		double bounce = 0.0;
+		double view = 0.0;
 		double steps = 0.0;
+		double view_swivel = 0.0;
+		double view_cont = 0.0;
 		for (Seed i : seeds){
 			swivel += i.getSwivel();
-			bounce += i.getBounce();
+			view += i.getView();
 			steps += i.getSteps();
+			view_swivel += i.view_swivel;
+			view_cont += i.view_cont;
 		}
 		int size = seeds.size();
-		System.out.println( (swivel / size) + "-" + (bounce / size) + "-" + (steps / size));
+		System.out.println (
+				"Swivel angle: " + (swivel / size) + 
+				" View: " + (view / size) + 
+				" Steps: " + (steps / size) + 
+				" View_swivel: " + (view_swivel / size) + 
+				" View_cont: "+ (view_cont / size));
 	}
 
 }

@@ -27,6 +27,8 @@ public class Simulation extends JPanel {
 	ArrayList<Food> foods = new ArrayList<Food>();
 	ArrayList<Seed> seeds = new ArrayList<Seed>();
 	
+	HashMap<Integer, ArrayList<Food>> mapped_foods = new HashMap<Integer, ArrayList<Food>>();
+	
 	int food_consumed = 0;
 
 	private void move() {
@@ -44,6 +46,7 @@ public class Simulation extends JPanel {
 		for (Fish fish: fishes.keySet()){
 			fish.paint(g2d);
 		}
+
 		g.setColor(new Color(0,0,0));
 		for (Food food: copyList(foods)){
 			food.paint(g2d);
@@ -63,19 +66,18 @@ public class Simulation extends JPanel {
 	public void fillWithFish(int n){
 		for (int i = 0; i < n; i++){
 			Seed s = seeds.get(Math.round(i / 2));
-			int swivel = s.getSwivel();
-			int conflict = s.getBounce();
-			fishes.put(new Fish(this, swivel, conflict, s.getSteps(), s.getView()), 0);
+			fishes.put(new Fish(this, s), 0);
 		}
 	}
 	
 	public void fillWithFood(int n){
 		for (int i = 0; i < n; i++){
-			foods.add(new Food(this));
+			Food f = new Food(this);  // passing simulation as this
+			foods.add(f); // Add to array list
+			addFood(f); // Add to map	
 		}
 	}
 
-	
 	public ArrayList<Fish> runSim(Game game) throws InterruptedException{
 		JFrame frame = new JFrame("Fishies");
 		ArrayList<Fish> sortedFishes = new ArrayList<Fish>();
@@ -90,31 +92,30 @@ public class Simulation extends JPanel {
 		this.fillWithFish(20);
 		this.fillWithFood(30);
 		
-		while (food_consumed <= 70) {
+		long t= System.currentTimeMillis();
+		long end = t+15000;
+		while (System.currentTimeMillis() <= end) {
 			this.move();
-			this.repaint();
-			if (food_consumed == 70){
-				// Sort and get top 5 fishes
-				sortedFishes = sortByComparator(fishes, false);
-			}
-			
+			this.repaint();			
 			Thread.sleep(5);
 		}
+		System.out.println("Food consumed:" + food_consumed);
+		sortedFishes = sortByComparator(fishes, false);
 		return sortedFishes;
 	}
 	
 	public void displayAverageFish(Graphics2D g){
 		double swivel = 0.0;
-		double bounce = 0.0;
+		double view = 0.0;
 		double steps = 0.0;
 		for (Fish i : fishes.keySet()){
 			swivel += i.swivel_range;
-			bounce += i.conflict_bounce;
+			view += i.view;
 			steps += i.steps;
 		}
 		int size = fishes.size();
 		Color c = new Color(maxColor((int)(swivel/size), 100), 
-				maxColor((int)(bounce/size), 360), (int)(steps/size)*5);
+				maxColor((int)(view/size), 50), maxColor((int)(steps/size)*5, 255));
 		
 		g.setColor(c);
 		g.fillOval(5, 5, 20, 20);
@@ -126,13 +127,39 @@ public class Simulation extends JPanel {
 		return Math.min(c, 255);
 	}
 	
+	public int flatten(int x_coor) {
+		return x_coor/50 * 50;
+	}
+	
+	/** Add food to hashmap */
+	public void addFood(Food f){
+		int x_coor = flatten(f.x); // Flatten x coor
+		ArrayList<Food> new_array = new ArrayList<Food>();
+		
+		// If the map already contains key, append f to existing list in value
+		if (mapped_foods.containsKey(x_coor)){
+			new_array = mapped_foods.get(x_coor);
+		}
+		new_array.add(f);
+		mapped_foods.put(x_coor, new_array);
+	}
+	
 	public void removeFood(Food food){
 		foods.remove(food);
-		foods.add(new Food(this));
+		Food f = new Food(this);
+		
+		// Remove from map
+		int x_coor = flatten(food.x);
+		ArrayList<Food> old = mapped_foods.get(x_coor);
+		old.remove(food);
+		mapped_foods.put(x_coor, old);
+		
+		foods.add(f);
+		addFood(f);
 		food_consumed++;
 	}
 	
-	public void addFood(Fish fish){
+	public void addFoodCount(Fish fish){
 		int old_value = fishes.get(fish);
 		fishes.put(fish, old_value + 1);
 	}
