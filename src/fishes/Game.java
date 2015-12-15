@@ -99,12 +99,12 @@ public class Game extends TimerTask {
 			String content = "";
 			Random randomGen = new Random();
 			for (int i = 0; i < 10; i++){
-				content += randomGen.nextInt(40);		 // Swivel range
-				content += " " + randomGen.nextInt(360); // Bounce
-				content += " " + randomGen.nextInt(60);	// Steps
-				content += " " + randomGen.nextInt(50);	 // View
-				content += " " + randomGen.nextInt(50);  // View swivel
-				content += " " + randomGen.nextInt(30);  // View continue
+				content += randomGen.nextInt(40);		 	// Swivel range
+				content += " " + randomGen.nextInt(360); 	// Bounce
+				content += " " + randomGen.nextInt(60);		// Steps
+				content += " " + randomGen.nextInt(80);		// View
+				content += " " + randomGen.nextInt(20);  	// View swivel
+				content += " " + randomGen.nextInt(30);  	// View continue
 				content += "\n";
 			}
 
